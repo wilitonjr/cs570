@@ -19,18 +19,17 @@ int main() {
     srand(time(NULL));
     
     /*
-     * Initialize global varabiles
+     * Initialize global variables
      */
     initilization();
 
     /* Create the consumer threads */
-    for (i = 0; i < CONSUMERS; i++)
-    {
-			if (pthread_create(&consumer_tid[i], NULL, consumer, (void *)i) != 0) {
-	    	perror("pthread_create");
-	    	abort();
-			}				
-		}
+    for (i = 0; i < CONSUMERS; i++) {
+        if (pthread_create(&consumer_tid[i], NULL, consumer, (void *)i) != 0) {
+            perror("pthread_create");
+            abort();
+        }				
+    }
     
     /* Create the producer threads */
     for (i = 0; i < PRODUCERS; i++)
