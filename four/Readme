@@ -1,0 +1,84 @@
+- Author -
+Wiliton Abreu Rodrigues - cssc2301
+SDSU - CS570 (summer 20)
+REDid: 824508185
+
+
+-----------------------------------------------------------------
+
+How the FIFO and LRU replacement algorithms were implemented:
+
+- First the program will call the FIFO() function top demonstrate the page replacement using this algorithme
+	- The FIFO() function calls the function FIFOInsert
+		- Function FIFOInsert will call the function FIFOSearch to see if the page nember is already in the memory
+			- If the page is already there, it does nothing
+			- Else, it returns to FIFOInsert() to insert the page into our memory. Respecting the FIFO order
+		- Back to FIFOInsert() it updates our memory acordinly and returns to FIFO()
+	- FIFO() function the prints the page frame and returns the page Fault Count to our main function
+	
+- The exatly same process is used with LRU() function. Respecting, of course, the desired behavior to replace the page in our simulated memory usuing the "Least Recently Used" pattern
+	- The Least Recently Used page is found by the function LRUSearch().
+		 
+
+
+-----------------------------------------------------------------
+
+
+
+
+- Description -
+
+This program simulates two different page replacement algorithms: FIFO (First-in  First-out) and LRU (Least  Recently  Used). This comparison demonstrates better understanding of these two page replacement methods.
+
+
+
+- How it works -
+
+It gets the argumets from the user input. The arguments are Virtual Pages (ReferenceSZ) and physical pages (FrameNR).
+
+So, each method (FIFO and LRU) will be represented properly.
+
+
+
+- How to Run -
+
+The following commands should be executed to run the programs:
+
+make            // to generate testvm executable file.
+./testvm [ReferenceSZ] [FrameNR]	// to run the testvm program. 
+
+
+
+- Outputs -
+
+The result of the programs is displayed on the screen.
+
+
+
+- Screen output example -
+
+The randomized Access Pattern: 4 3 2 3 2 1 5 6 6 4 6 1 5 2 5 6 4 4 4 2
+Running program using FIFO algorithm ... ...
+ 4 -1 -1
+ 4  3 -1
+ 4  3  2
+ 
+ ...
+
+ 2  6  4
+ 2  6  4
+ 2  6  4
+page fault of FIFO: 12
+
+The Same Access Pattern: 4 3 2 3 2 1 5 6 6 4 6 1 5 2 5 6 4 4 4 2
+Running program using LRU algorithm ... ...
+ 4 -1 -1
+ 4  3 -1
+ 4  3  2
+ 
+ ...
+
+ 5  6  4
+ 5  6  4
+ 2  6  4
+page fault of LRU: 13

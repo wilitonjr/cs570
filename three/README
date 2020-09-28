@@ -1,0 +1,173 @@
+- Author -
+Wiliton Abreu Rodrigues - cssc2301
+SDSU - CS570 (summer 20)
+REDid: 824508185
+
+
+-----------------------------------------------------------------
+
+
+The following questions and answers explain my implementation:
+
+
+
+1. Which are the critical regions need to be protected for mutual exclusion? Why are they? 
+
+	- The regions where the program insert or removes items in/from the buffer needs to be protected.
+	- If two threads have access to this functions at the exactly same moment they could insert items in and/or remove items from the wrong spot.
+	- So the protection is necessary to control all this thread accesses and make sure the buffer "next spot" is always updated for both the 'remove' and 'insert' operations.
+
+
+
+2. There are 7 requirements your program should achieve: 
+
+
+1)	When a producer thread inserts a new item into the buffer, a message should be print to screen showing which thread (with ID) insert which item (with value) to which buffer slot (with next_in).
+ 
+	- Inside the 'insert_item' function the line ' printf("producer %ld: inserted item %d into buffer index %d\n", id, item, buffer.next_in); ' shows the desired message.
+	- The 'id' variable represents the thread ID.
+	- The 'item' variable represents the item value.
+	- The 'buffer.next_in' variable represents the buffer slot.
+
+
+2)	When a consumer thread removes a new item from the buffer, a message should be print to screen showing which thread (with ID) remove which item (with value) from which buffer slot (with next_out).
+
+	- Inside the 'remove_item' function the line ' printf("consumer %ld: removed item %d from buffer index %d\n", id, *item, buffer.next_out); ' shows the desired message.
+	- The 'id' variable represents the thread ID.
+	- The 'item' variable represents the item value.
+	- The 'buffer.next_out' variable represents the buffer slot.
+
+
+3)	Producers must block if the buffer is full,
+	
+	- This semaphore is implemented by the line ' sem_wait(&full_sem); ' inside the function ' insert_item '.
+	- It checks if the buffer has some space available. If it does not have a spot, it makes the function wait until a spot become available.
+
+
+4)	Consumers must block if the buffer is empty,
+
+	- This semaphore is implemented by the line ' sem_wait(&empty_sem); ' inside the function ' remove_item '.
+	- It checks if the buffer is empty. If it does not have a spot to remove from, it makes the function wait until a spot is filled.
+
+
+5)	No two/more producers insert items to the same buffer slot,
+
+	- First of all the ' insert_item ' function is protected by being accessed at the same time by more than one thread. ( sem_wait(&mutex_sem); )
+	- The spot where the next item will be inserted is updated by the line ' buffer.next_in = (buffer.next_in + 1) % BUFFER_SIZE; '. 
+	- So when the next thread inserts an item, it will be inserted in the right buffer spot.
+
+
+6)	No two/more consumers remove the items from the same buffer slot,
+
+	- The ' remove_item ' function is also protected by being accessed at the same time by more than one thread. ( sem_wait(&mutex_sem); )
+	- The spot where the next item will be removed from is updated by the line ' buffer.next_out = (buffer.next_out + 1) % BUFFER_SIZE; '.
+	- So when the next thread removes an item, it will be removed from the right buffer spot.
+
+
+7)	The messages must be printed in the order showing the real execution scenarios.
+
+	- As the whole program uses threads (to run activities in parallel) and semaphores (to control all the parallel proceedings), every single messages that are shown to the user appears at the order that they are really happening.
+	
+				
+3) Why you think your design is the most effective one? Is there any other design also works but less effective? 
+
+	- I used a very simple design implementing semaphores to both protect the critical regions where the buffer is being update and also to make sure that this update will be occurred at the right buffer spot.
+	
+	- I initialized all my semaphores:
+		- sem_init(&mutex_sem, 0, 1);
+		- sem_init(&full_sem, 0, BUFFER_SIZE);
+    		- sem_init(&empty_sem, 0, 0);
+
+	- And updated them inside the insert and remove functions to reflect the wanted behaviors:
+		- Protect the critical regions
+			- sem_wait(&mutex_sem);
+			- sem_post(&mutex_sem); 
+		- Make sure the buffer was not full (before a new insertion)
+			- sem_wait(&full_sem);
+		- Make sure the buffer was not empty (before a new removal)
+			- sem_wait(&empty_sem);
+
+	- Yes. This is the simplest and most effective design I could make. Maybe the semaphores could be implemented inside the 'producer' and 'consumer' functions, but it would requires more code lines and would be less effective.
+ 
+
+
+------------------------------------------------
+
+
+
+- Description -
+
+This program implements the bounded-buffer (producer / consumer) problems demonstration.
+A buffer size is defined and producers and consumers insert and remove items from this buffer.
+The main goal is to show how to manage the problems caused by concurrent access of this activeties.
+
+
+
+- How it works -
+
+It creates multiple threads to both insert and remove items from the created buffer.
+
+Each thread created will have their activity (remove or insert), where in the buffer it will act, and what item it will remove of insert.
+
+When a producer thread starts, it prints a message to the output screen
+showing that it started.
+
+It also shows messages at the moment it is inserting or remiving an item to/from the buffer.
+
+All messages matches the real execution orders.
+
+The 'testbuffer' ramdomly choses operations and items to produce the described activities. 
+
+
+
+- How to Run -
+
+The following commands should be executed to run the programs:
+
+make            // to generate testbuffer executable file.
+./testbuffer	// to run the testbuffer program. 
+
+
+
+- Outputs -
+
+The result of the programs is displayed on the screen.
+
+
+
+- Screen output example -
+
+Consumer 0: Started
+Consumer 1: Started
+Producer 0: Started
+Producer 1: Started
+Consumer 2: Started
+Producer 2: Started
+Producer 1: Inserted item 2264 into buffer index 0
+Producer 3: Started
+Producer 4: Started
+Consumer 2: Removed item 2264 from buffer index 0
+Producer 1: Inserted item 6991 into buffer index 1
+Producer 4: Inserted item 8315 into buffer index 2
+Producer 1: Inserted item 1213 into buffer index 3
+Consumer 0: Removed item 6991 from buffer index 1
+Consumer 1: Removed item 8315 from buffer index 2
+Consumer 0: Removed item 1213 from buffer index 3
+Producer 3: Inserted item 4442 into buffer index 4
+Producer 3: Inserted item 7131 into buffer index 0
+Producer 3: Inserted item 4005 into buffer index 1
+Producer 0: Inserted item 5235 into buffer index 2
+Producer 2: Inserted item 2432 into buffer index 3
+Consumer 2: Removed item 4442 from buffer index 4
+Producer 1: Inserted item 4862 into buffer index 4
+Consumer 1: Removed item 7131 from buffer index 0
+Producer 4: Inserted item 9455 into buffer index 0
+Consumer 0: Removed item 4005 from buffer index 1
+Producer 1: Inserted item 3489 into buffer index 1
+Consumer 2: Removed item 5235 from buffer index 2
+Producer 2: Inserted item 2835 into buffer index 2
+
+...
+...
+...
+
